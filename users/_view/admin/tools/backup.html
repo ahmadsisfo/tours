@@ -1,0 +1,54 @@
+<? echo $header; ?><?php echo $menu; ?>
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-backup" data-toggle="tooltip" title="<? echo $button_backup; ?>" class="btn btn-default"><i class="fa fa-download"></i></button>
+     
+      </div>
+      <h1><?php echo $heading_title; ?></h1>
+      <ul class="breadcrumb">
+        <? foreach ($breadcrumbs as $breadcrumb) { ?>
+        <li><a href="<? echo $breadcrumb['href']; ?>"><? echo $breadcrumb['text']; ?></a></li>
+        <? } ?>
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <? if ($error_warning) { ?>
+    <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> <? echo $error_warning; ?>
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    <? } ?>
+    <? if ($success) { ?>
+    <div class="alert alert-success"><i class="fa fa-check-circle"></i> <? echo $success; ?>
+      <button type="button" form="form-backup" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    <? } ?>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-exchange"></i> <? echo $heading_title; ?></h3>
+      </div>
+      <div class="panel-body">
+        <form id="form-backup" action="<? echo $backup; ?>" method="post" enctype="multipart/form-data"  class="form-horizontal">
+          <div class="form-group">
+            <label class="col-sm-2 control-label"><? echo $entry_backup; ?></label>
+            <div class="col-sm-10">
+              <div class="well well-sm" style="height: 150px; overflow: auto;">
+                <? foreach ($tables as $table) { ?>
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" name="backup[]" value="<? echo $table; ?>" checked="checked" />
+                    <? echo $table; ?>
+				  </label>
+                </div>
+                <? } ?>
+              </div>
+              <a onclick="$(this).parent().find(':checkbox').prop('checked', true);"><?php echo $text_select_all; ?></a> / <a onclick="$(this).parent().find(':checkbox').prop('checked', false);"><?php echo $text_unselect_all; ?></a></div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<? echo $footer; ?>

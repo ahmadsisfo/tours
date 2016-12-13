@@ -1,0 +1,8 @@
+<div class="form-group [required]">
+	<div class="col-sm-12">
+		<input type="hidden" name="[inputname]" value="<?php echo$[fieldname]; ?>"  id="input-[inputname]" />
+		<?php if (isset($error['[inputname]'])) { ?>
+		<div class="text-danger"><?php echo $error['[inputname]']; ?></div>
+		<?php } ?>
+	</div>
+</div>

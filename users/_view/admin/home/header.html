@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html dir="<?php echo $direction; ?>" lang="<?php echo $lang; ?>">
+	<head>
+	<meta charset="UTF-8" />
+	<title><?php echo $title; ?></title>
+	<base href="<?php echo HTTPS_SERVER; ?>" />
+	<?php if ($description) { ?>
+	<meta name="description" content="<?php echo $description; ?>" />
+	<?php } ?>
+	<?php if ($keywords) { ?>
+	<meta name="keywords" content="<?php echo $keywords; ?>" />
+	<?php } ?>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<script type="text/javascript" src="<? echo$client ?>admin/js/require.js"></script>
+	<script type="text/javascript" src="<? echo$client ?>admin/js/loader.js"></script/>
+	
+	<link href="<? echo$client ?>library/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen" />
+	<link href="<? echo$client ?>library/font-awesome/css/font-awesome.min.css" type="text/css" rel="stylesheet" />
+	<link href="<? echo$client ?>library/summernote/summernote.css" rel="stylesheet">
+	<link href="<? echo$client ?>library/bootstrap/datetimepicker/bootstrap-datetimepicker.min.css" type="text/css" rel="stylesheet" media="screen" />
+	<link href="<? echo$client ?>admin/css/stylesheet.css" type="text/css" rel="stylesheet" media="screen" />
+	
+	</head>
+<body onload="">
+<div id="container">
+<header id="header" class="navbar navbar-static-top">
+  <div class="navbar-header">
+        <a type="button" id="button-menu" class="pull-left"><i class="fa fa-indent fa-lg"></i></a>
+        <a href="#" class="navbar-brand"><!--<img src="<? echo$client ?>img/" alt="SIMPEG" title="SIMPEG" />--></a></div>
+    <ul class="nav pull-right">
+    <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown"><span class="label label-danger pull-left">0</span> <i class="fa fa-bell fa-lg"></i></a>
+      <ul class="dropdown-menu dropdown-menu-right alerts-dropdown">
+        <li class="dropdown-header">Orders</li>
+        <li><a href="#" style="display: block; overflow: auto;">Pending <span class="label label-warning pull-right">0</span></a></li>
+        <li><a href="#">Completed <span class="label label-success pull-right">0</span></a></li>
+        <li><a href="#">Returns <span class="label label-danger pull-right">0</span></a></li>
+        <li class="divider"></li>
+        <li class="dropdown-header">Customers</li>
+        <li><a href="#">Customers Online <span class="label label-success pull-right">0</span></a></li>
+        <li><a href="#">Pending approval <span class="label label-danger pull-right">0</span></a></li>
+        <li class="divider"></li>
+        <li class="dropdown-header">Products</li>
+        <li><a href="#">Out of stock <span class="label label-danger pull-right">0</a></li>
+        <li><a href="#">Reviews <span class="label label-danger pull-right">0</span></a></li>
+        <li class="divider"></li>
+        <li class="dropdown-header">Affiliates</li>
+        <li><a href="#">Pending approval <span class="label label-danger pull-right">0</span></a></li>
+      </ul>
+    </li>
+    <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-life-ring fa-lg"></i></a>
+      <ul class="dropdown-menu dropdown-menu-right">
+        <li class="dropdown-header">Stores <i class="fa fa-shopping-cart"></i></li>
+            <li><a href="#" target="_blank">Your Store</a></li>
+            <li class="divider"></li>
+        <li class="dropdown-header">Help <i class="fa fa-life-ring"></i></li>
+        <li><a href="#" target="_blank">Homepage</a></li>
+        <li><a href="#" target="_blank">Documentation</a></li>
+        <li><a href="#" target="_blank">Support Forum</a></li>
+      </ul>
+    </li>
+    <li><a href="<? echo$url->link('admin/home/logout',$sign,'SSL'); ?>" onclick="return confirm('Are you sure to Log out ?')? true:false; "><span class="hidden-xs hidden-sm hidden-md">Logout</span> <i class="fa fa-sign-out fa-lg"></i></a></li>
+  </ul>
+  </header>
+  <nav id="column-left">
+<div id="profile">
+  <div><a class="dropdown-toggle" data-toggle="dropdown"><img src="<?php if(isset($userimage))echo$userimage; ?>" alt="firstname lastname" title="username" class="img-circle" style="max-width:70px; max-height:70px;" /></a></div>
+  <div>
+    <h4><?php if(isset($username))echo$username ?></h4>
+    <small><?php if(isset($usergroup))echo$usergroup ?></small></div>
+</div>
+<ul id="menu">
+  <li id="dashboard"><a href="<? echo$url->link('admin/home/dashboard', $sign, 'SSL') ?>"><i class="fa fa-dashboard fa-fw"></i> <span>dashboard</span></a></li>
+  <?php echo$menu; ?>
+  <li id="system"><a class="parent"><i class="fa fa-cog fa-fw"></i> <span>system</span></a>
+    <ul>
+      
+      <li><a href="<? echo$url->link('admin/system/setting', $sign, 'SSL') ?>">setting</a></li>
+      <!--<li><a class="parent">mail</a>
+        <ul>
+          <li><a href="<? echo$url->link('admin/system/mailsend', $sign, 'SSL') ?>">send</a></li>
+          <li><a href="<? echo$url->link('admin/system/mailreceive', $sign, 'SSL') ?>">receive</a></li>
+        </ul>
+      </li>-->
+      <li><a class="parent">users</a>
+        <ul>
+          <li><a href="<? echo$url->link('admin/system/user', $sign, 'SSL') ?>">user</a></li>
+          <li><a href="<? echo$url->link('admin/system/user_group', $sign, 'SSL') ?>">user group</a></li>
+          <!--<li><a href="<? echo$url->link('admin/system/api', $sign, 'SSL') ?>">api</a></li>-->
+        </ul>
+      </li>
+      
+    </ul>
+  </li>
+  <li id="tools"><a class="parent"><i class="fa fa-wrench fa-fw"></i> <span>tools</span></a>
+    <ul>
+      <!--<li><a href="<? echo$url->link('admin/tools/upload', $sign, 'SSL') ?>">upload</a></li>
+      <li><a href="<? echo$url->link('admin/tools/backup', $sign, 'SSL') ?>">backup</a></li>
+      <li><a href="<? echo$url->link('admin/tools/restore', $sign, 'SSL') ?>">restore</a></li>-->
+      <li><a href="<? echo$url->link('admin/tools/handling', $sign, 'SSL') ?>">handling</a></li>
+      <li><a href="<? echo$url->link('admin/system/menu', $sign, 'SSL') ?>">menus</a></li>
+      <li><a href="<? echo$url->link('admin/tools/edit_script', $sign, 'SSL') ?>">edit script</a></li>
+      <li><a href="<? echo$url->link('admin/tools/error_log', $sign, 'SSL') ?>">error log</a></li>
+    </ul>
+  </li>
+</ul>
+<div id="stats">
+  <ul>
+    <li>
+      <div>text_complete_status <span class="pull-right">0%</span></div>
+      <div class="progress">
+        <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="complete_status" aria-valuemin="0" aria-valuemax="100" style="width: 40%"> <span class="sr-only">40% Complete (success)</span> </div>
+      </div>
+    </li>
+    <li>
+      <div>text_processing_status <span class="pull-right">0%</span></div>
+      <div class="progress">
+        <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="processing_status" aria-valuemin="0" aria-valuemax="100" style="width: 40%"> <span class="sr-only">40% Complete (success)</span> </div>
+      </div>
+    </li>
+    <li>
+      <div>text_other_status <span class="pull-right">0%</span></div>
+      <div class="progress">
+        <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="other_status" aria-valuemin="0" aria-valuemax="100" style="width: 40%"> <span class="sr-only">40% Complete (success)</span> </div>
+      </div>
+    </li>
+  </ul>
+</div>
+</nav>

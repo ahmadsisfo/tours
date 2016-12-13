@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Administrator</title>
+    <link rel="stylesheet" href="<?php echo$client ?>admin/login/style.css">
+  </head>
+
+  <body>
+	<br/>
+	<div style="text-align:center">
+	<a href="<? echo$url_home ?>">Home</a>
+	<a href="<? echo$forgotten; ?>">Forgotten Password ?</a>
+    </div>
+	<div class="wrapper">
+	<div class="container">
+		
+		<h1>Welcome</h1>
+		
+		<? if(isset($_SESSION['mail_success']))
+			echo'<label style="color:green">'.$_SESSION['mail_success'].'</label><br/>';
+		   if(isset($error_login))
+			echo'<label style="color:#9A1B45">'.$error_login.'</label><br/>';
+		?>
+		<form class="form" method="post" action="<?echo$url_action ?>" id="form-login">
+			<input type="text" name="username" placeholder="username" autofocus required />
+			<input type="password" name="password" placeholder="password" required />
+			<button type="submit" id="login-button">Login</button>
+		</form>
+		
+		<br/>
+		<h4 style="color:#52CCa5; position:fixed; bottom:30px; right:30px;">&copy; IRSTour by Rahmat Nurfajri | RNF Aypro</h4>
+    
+	</div>
+	
+	<ul class="bg-bubbles">
+		<li></li><li></li><li></li><li></li>
+		<li></li><li></li><li></li><li></li>
+		<li></li><li></li><li></li><li></li>
+		<li></li><li></li><li></li><li></li>
+		<li></li><li></li><li></li><li></li>
+	</ul>
+</div>
+  </body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Chart</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<script type="text/javascript" src="<? echo$client ?>library/jqplot/jquery.js"></script>
+	<script type="text/javascript" src="<? echo$client ?>library/jqplot/jquery.jqplot.js"></script>
+	<script type="text/javascript" src="<? echo$client ?>library/jqplot/plugins/jqplot.barRenderer.js"></script>
+	<script type="text/javascript" src="<? echo$client ?>library/jqplot/plugins/jqplot.categoryAxisRenderer.js"></script>
+	<script type="text/javascript" src="<? echo$client ?>library/jqplot/plugins/jqplot.pointLabels.js"></script>
+	
+	
+	<link rel="stylesheet" type="text/css" href="<? echo$client ?>library/jqplot/jquery.jqplot.min.css" />
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	
+  </head>
+  <body>
+	<div class="container">
+				<p class="left brown-text" ><i class="material-icons" style="font-size:30px">group</i> <?php echo$count; ?> people rating this</p>
+				<p class="left brown-text" >
+					<span><i class="material-icons" style="font-size:30px">star</i>avg rating <?php echo$avg; ?></span>
+					<span style="float:right"><?php echo$sum; ?> views <i class="material-icons" style="font-size:28px">info</i></span>
+				</p>
+				
+	</div>
+	
+    <div id="chart1"></div>
+	
+  </body>
+  
+  <script  type="text/javascript">
+	
+	
+	$(document).ready(function(){
+	
+	
+		$.jqplot.config.enablePlugins = true;
+		var s1 = [<?php echo$s1; ?>];
+		var ticks = [<?php echo$ticks; ?>];
+		 
+		plot1 = $.jqplot('chart1', [s1], {
+			// Only animate if we're not using excanvas (not in IE 7 or IE 8)..
+			animate: !$.jqplot.use_excanvas,
+			seriesDefaults:{
+				renderer:$.jqplot.BarRenderer,
+				shadowAngle: 135,
+				pointLabels: { show: true },
+				rendererOptions: {
+					barDirection: 'horizontal',
+					varyBarColor: true
+				},
+			},
+			
+			axes: {
+				yaxis: {
+					renderer: $.jqplot.CategoryAxisRenderer,
+					ticks: ticks
+				}
+			},
+			//highlighter: { show: false }
+		});
+	 
+		$('#chart1').bind('jqplotDataClick', 
+			function (ev, seriesIndex, pointIndex, data) {
+				$('#info1').html('series: '+seriesIndex+', point: '+pointIndex+', data: '+data);
+			}
+		);
+	});
+	
+  </script>
+</html>

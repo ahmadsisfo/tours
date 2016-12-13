@@ -1,0 +1,779 @@
+<?php echo $header; ?>
+
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-spatial" data-toggle="tooltip" title="<?php echo $button_save; ?>" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="<?php echo $cancel; ?>" data-toggle="tooltip" title="<?php echo $button_cancel; ?>" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+      <h1><?php echo $heading_title; ?></h1>
+      <ul class="breadcrumb">
+        <?php foreach ($breadcrumbs as $breadcrumb) { ?>
+        <li><a href="<?php echo $breadcrumb['href']; ?>"><?php echo $breadcrumb['text']; ?></a></li>
+        <?php } ?>
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <?php if ($error_warning) { ?>
+    <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> <?php echo $error_warning; ?>
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    <?php } ?>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> <?php echo $text_form; ?></h3>
+      </div>
+      <div class="panel-body">
+        <form action="<?php echo $action; ?>" method="post" enctype="multipart/form-data" id="form-spatial" class="form-horizontal">
+          <ul class="nav nav-tabs">
+            <li ><a href="#tab-general" data-toggle="tab"><?php echo $tab_general; ?></a></li>
+            <li class="active"><a href="#tab-map" data-toggle="tab"><?php echo $tab_map; ?></a></li>
+            <li><a href="#tab-data" data-toggle="tab"><?php echo $tab_data; ?></a></li>
+            <li><a href="#tab-links" data-toggle="tab"><?php echo $tab_links; ?></a></li>
+			<li><a href="#tab-special" data-toggle="tab"><?php echo $tab_special; ?></a></li>
+            <li><a href="#tab-image" data-toggle="tab"><?php echo $tab_image; ?></a></li>
+            <li><a href="#tab-comment" data-toggle="tab"><?php echo $tab_comment; ?></a></li>
+           </ul>
+          <div class="tab-content">
+            <div class="tab-pane " id="tab-general">
+              <div class="tab-content">
+                  <div class="form-group required">
+                    <label class="col-sm-2 control-label" for="input-name"><?php echo $entry_name; ?></label>
+                    <div class="col-sm-10">
+                      <input type="text" name="spatial[name]" value="<?php echo $name ?>" placeholder="<?php echo $entry_name; ?>" id="input-name" class="form-control" />
+                    </div>
+                  </div>
+                  <div class="form-group required">
+                    <label class="col-sm-2 control-label" for="input-meta-title"><?php echo $entry_address; ?></label>
+                    <div class="col-sm-10">
+                      <input type="text" name="spatial[address]" value="<?php echo $address ?>" placeholder="<?php echo $entry_address; ?>" id="input-meta-title" class="form-control" />
+                    </div>
+                  </div>
+				  <div class="form-group">
+                    <label class="col-sm-2 control-label" for="input-description"><?php echo $entry_description; ?></label>
+                    <div class="col-sm-10">
+                      <textarea name="spatial[description]" placeholder="<?php echo $entry_description; ?>" id="input-description" class="form-control summernote"><?php echo$description ?></textarea>
+                    </div>
+                  </div>
+              </div>
+            </div>
+            <div class="tab-pane active" id="tab-map">
+				
+				<style  type="text/css">
+					  .color-button {
+						width: 14px;
+						height: 14px;
+						font-size: 0;
+						margin: 2px;
+						float: left;
+						cursor: pointer;
+					  }
+
+					  #delete-button {
+						margin-top: 5px;
+					  }
+				</style>
+				<div class="col-sm-3">
+					<div id="panel">
+					  <div id="color-palette"></div><br/>
+					  <a id="delete-button" class="btn btn-danger">Delete Selected Shape</a><br/><br/>
+					  
+					<input type="text" name="spatial[geomtype]" id="geomtype" class="form-control" placeholder="..."  /><br/>
+					<textarea name="spatial[geom]" id="coordinate" class="form-control" placeholder="coordinate" style="height:70px;"></textarea>
+					<br/>
+					<div id="curpos" class="alert alert-info"></div>
+					<div id="cursel" class="alert alert-success"></div>
+					<div id="note" class="alert alert-warning">
+						<small>Note: markers can be selected, but are not graphically indicated; can be deleted, but cannot have their color changed.</small>
+					</div>
+					</div>
+					<input id="pac-input" type="text" class="form-control " style="width:30%; " style="" placeholder="Search Box">
+				</div>
+				<div class="col-sm-9" id="map" style="height:500px; border:1px solid #CCC; background:#D2D2FD;"></div>
+            </div>
+            <div class="tab-pane" id="tab-data">
+              
+              <div class="form-group required">
+                <label class="col-sm-2 control-label" for="input-category"><?php echo $entry_category; ?></label>
+                <div class="col-sm-10">
+                  <select name="spatial[category_id]" id="input-category" class="form-control" onchange="getattributeform(this.value);">
+                    <option value="">- pilih -</option>
+                    <?php foreach ($categorys as $category) { ?>
+                    <?php if ($category['category_id'] == $category_id) { ?>
+                    <option value="<?php echo $category['category_id']; ?>" selected="selected"><?php echo $category['name']; ?></option>
+                    <?php } else { ?>
+                    <option value="<?php echo $category['category_id']; ?>"><?php echo $category['name']; ?></option>
+                    <?php } ?>
+                    <?php } ?>
+                  </select>
+                </div>
+              </div>
+			  <div id="form-spatial-attribute">			  
+				  <?php
+				  if(isset($attributes)){ 
+					 foreach($attributes as $attribute){
+						if($attribute['type'] == "textarea"){
+							echo'<div class="form-group">
+								<label class="col-sm-2 control-label">'.$attribute['name'].'</label>
+								<div class="col-sm-10">
+								  <textarea name="attribute['.$attribute['id'].']" placeholder="'.$attribute['name'].'" id="" class="form-control summernote">'.$attribute['value'].'</textarea>
+								</div>
+							  </div>';
+						} else {
+							echo'<div class="form-group">
+								<label class="col-sm-2 control-label">'.$attribute['name'].'</label>
+								<div class="col-sm-10">
+								  <input type="'.$attribute['type'].'" name="attribute['.$attribute['id'].']" value="'.$attribute['value'].'" placeholder="'.$attribute['name'].'" class="form-control" />
+								</div>
+							  </div>';
+						}
+					 }
+				  }
+				  ?>
+			  </div>
+            </div>
+            <div class="tab-pane" id="tab-links">
+            
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-filter"><span data-toggle="tooltip" title="<?php echo $help_filter; ?>"><?php echo $entry_filter; ?></span></label>
+                <div class="col-sm-10">
+                  <input type="text" name="filter" value="" placeholder="<?php echo $entry_filter; ?>" id="input-filter" class="form-control" />
+                  <div id="spatial-filter" class="well well-sm" style="height: 150px; overflow: auto;">
+                    <?php foreach ($spatial_filters as $spatial_filter) { ?>
+                    <div id="spatial-filter<?php echo $spatial_filter['filter_id']; ?>"><i class="fa fa-minus-circle"></i> <?php echo $spatial_filter['name']; ?>
+                      <input type="hidden" name="spatial_filter[]" value="<?php echo $spatial_filter['filter_id']; ?>" />
+                    </div>
+                    <?php } ?>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-related"><span data-toggle="tooltip" title="<?php echo $help_related; ?>"><?php echo $entry_related; ?></span></label>
+                <div class="col-sm-10">
+                  <input type="text" name="related" value="" placeholder="<?php echo $entry_related; ?>" id="input-related" class="form-control" />
+                  <div id="spatial-related" class="well well-sm" style="height: 150px; overflow: auto;">
+                    <?php foreach ($spatial_relateds as $spatial_related) {  ?>
+                    <div id="spatial-related<?php echo $spatial_related['related_gid']; ?>"><i class="fa fa-minus-circle"></i> <?php echo $spatial_related['name']; ?>
+                      <input type="hidden" name="spatial_related[]" value="<?php echo $spatial_related['related_gid']; ?>" />
+                    </div>
+                    <?php } ?>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane" id="tab-special">
+              <div class="table-responsive">
+                <table id="special" class="table table-striped table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <td class="text-center"><?php echo $entry_priority; ?></td>
+                      <td class="text-center">description</td>
+                      <td class="text-center"><?php echo $entry_price; ?></td>
+                      <td class="text-center"><?php echo $entry_date_start; ?></td>
+                      <td class="text-center"><?php echo $entry_date_end; ?></td>
+                      <td></td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php $special_row = 0; ?>
+                    <?php foreach ($spatial_specials as $spatial_special) { ?>
+                    <tr id="special-row<?php echo $special_row; ?>">
+                      <td class="text-right"><input type="number" name="spatial_special[<?php echo $special_row; ?>][priority]" value="<?php echo $spatial_special['priority']; ?>" placeholder="<?php echo $entry_priority; ?>" class="form-control" /></td>
+                      <td class="text-right"><input type="text" name="spatial_special[<?php echo $special_row; ?>][description]" value="<?php echo $spatial_special['description']; ?>" placeholder="description" class="form-control" /></td>
+					  <td class="text-right"><input type="text" name="spatial_special[<?php echo $special_row; ?>][price]" value="<?php echo $spatial_special['price']; ?>" placeholder="<?php echo $entry_price; ?>" class="form-control" /></td>
+                      <td class="text-left" style="width: 20%;"><div class="input-group date">
+                          <input type="text" name="spatial_special[<?php echo $special_row; ?>][date_start]" value="<?php echo $spatial_special['date_start']; ?>" placeholder="<?php echo $entry_date_start; ?>" data-date-format="DD-MM-YYYY" class="form-control" />
+                          <span class="input-group-btn">
+                          <button class="btn btn-default" type="button"><i class="fa fa-calendar"></i></button>
+                          </span></div></td>
+                      <td class="text-left" style="width: 20%;"><div class="input-group date">
+                          <input type="text" name="spatial_special[<?php echo $special_row; ?>][date_end]" value="<?php echo $spatial_special['date_end']; ?>" placeholder="<?php echo $entry_date_end; ?>" data-date-format="DD-MM-YYYY" class="form-control" />
+                          <span class="input-group-btn">
+                          <button class="btn btn-default" type="button"><i class="fa fa-calendar"></i></button>
+                          </span></div></td>
+                      <td class="text-left"><button type="button" onclick="$('#special-row<?php echo $special_row; ?>').remove();" data-toggle="tooltip" title="<?php echo $button_remove; ?>" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>
+                    </tr>
+                    <?php $special_row++; ?>
+                    <?php } ?>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="5"></td>
+                      <td class="text-left"><button type="button" onclick="addSpecial();" data-toggle="tooltip" title="<?php echo $button_special_add; ?>" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+            <div class="tab-pane" id="tab-image">
+              <div class="table-responsive">
+                <table class="table table-striped table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <td class="text-left"><?php echo $entry_image; ?></td>
+                    </tr>
+                  </thead>
+                  
+                  <tbody>
+                    <tr>
+                      <td class="text-left"><a href="" id="thumb-image-utama" data-toggle="image" class="img-thumbnail"><img src="<?php echo $thumb; ?>" alt="" title="" data-placeholder="<?php echo $placeholder; ?>" /></a><input type="hidden" name="spatial[image]" value="<?php echo $image; ?>" id="input-image" /></td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="table-responsive">
+                <table id="images" class="table table-striped table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <td class="text-left"><?php echo $entry_additional_image; ?></td>
+                      <td class="text-center">Name</td>
+                      <td class="text-center">Description</td>
+                      <td class="text-center"><?php echo $entry_sort_order; ?></td>
+                      <td></td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php $image_row = 0; ?>
+                    <?php foreach ($spatial_images as $spatial_image) { ?>
+                    <tr id="image-row<?php echo $image_row; ?>">
+                      <td class="text-left"><a href="" id="thumb-image<?php echo $image_row; ?>" data-toggle="image" class="img-thumbnail"><img src="<?php echo $spatial_image['thumb']; ?>" alt="" title="" data-placeholder="<?php echo $placeholder; ?>" /></a><input type="hidden" name="spatial_image[<?php echo $image_row; ?>][image]" value="<?php echo $spatial_image['image']; ?>" id="input-image<?php echo $image_row; ?>" /></td>
+                      <td class="text-center"><input type="text" name="spatial_image[<?php echo $image_row; ?>][name]" value="<?php echo $spatial_image['name']; ?>" placeholder="name" class="form-control" /></td>
+                      <td class="text-center"><input type="text" name="spatial_image[<?php echo $image_row; ?>][description]" value="<?php echo $spatial_image['description']; ?>" placeholder="description" class="form-control" /></td>
+                      <td class="text-right"><input type="number" name="spatial_image[<?php echo $image_row; ?>][sort_order]" value="<?php echo $spatial_image['sort_order']; ?>" placeholder="<?php echo $entry_sort_order; ?>" class="form-control" /></td>
+                      <td class="text-left"><button type="button" onclick="$('#image-row<?php echo $image_row; ?>').remove();" data-toggle="tooltip" title="<?php echo $button_remove; ?>" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>
+                    </tr>
+                    <?php $image_row++; ?>
+                    <?php } ?>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="4"></td>
+                      <td class="text-left"><button type="button" onclick="addImage();" data-toggle="tooltip" title="<?php echo $button_image_add; ?>" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+			<div class="tab-pane" id="tab-comment">
+              <div class="table-responsive">
+                <table id="comment" class="table table-striped table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <td class="text-center">status</td>
+                      <td class="text-center">user</td>
+                      <td class="text-center">comment</td>
+                      <td class="text-center">date</td>
+                      <td class="text-center">time</td>
+                      <td></td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php $comment_row = 0; ?>
+                    <?php foreach ($spatial_comments as $spatial_comment) { ?>
+                    <tr id="comment-row<?php echo $comment_row; ?>">
+                      <td class="text-right"> <select name="spatial_comment[<?php echo $comment_row; ?>][status]" id="input-status" class="form-control">
+						<?php if ($spatial_comment['status']) { ?>
+						<option value="0"><?php echo $text_disabled; ?></option>
+						<option value="1" selected="selected"><?php echo $text_enabled; ?></option>
+						<?php } else { ?>
+						<option value="0" selected="selected"><?php echo $text_disabled; ?></option>
+						<option value="1"><?php echo $text_enabled; ?></option>
+						<?php } ?>
+					  </select></td>
+                      
+					  <td class="text-right"><input type="text" name="spatial_comment[<?php echo $comment_row; ?>][username]" value="<?php echo $spatial_comment['username']; ?>" placeholder="<?php echo $entry_price; ?>" class="form-control" /></td>
+					  
+					  <td class="text-right"  style="width: 40%;"><textarea class="form-control" name="spatial_comment[<?php echo $comment_row; ?>][comment]" placeholder="comment"><?php echo $spatial_comment['comment']; ?></textarea></td>
+                      <td class="text-left"><div class="input-group date">
+                          <input type="text" name="spatial_comment[<?php echo $comment_row; ?>][date]" value="<?php echo $spatial_comment['date']; ?>" placeholder="date" data-date-format="DD-MM-YYYY" class="form-control" />
+                          <span class="input-group-btn">
+                          <button class="btn btn-default" type="button"><i class="fa fa-calendar"></i></button>
+                          </span></div></td>
+                      <td class="text-left" style="width: 20%;"><div class="input-group date">
+                          <input type="time" name="spatial_comment[<?php echo $comment_row; ?>][time]" value="<?php echo time("HH:mm:ss", $spatial_comment['time']); ?>" placeholder="<?php echo $entry_date_end; ?>" class="form-control" />
+                          </div></td>
+                      <td class="text-left"><button type="button" onclick="$('#comment-row<?php echo $comment_row; ?>').remove();" data-toggle="tooltip" title="<?php echo $button_remove; ?>" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>
+                    </tr>
+                    <?php $comment_row++; ?>
+                    <?php } ?>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="5"></td>
+                      <td class="text-left"><button type="button" onclick="addComment();" data-toggle="tooltip" title="<?php echo $button_add; ?>" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div id="in-textarea" style="display:none">
+	  <div class="form-group">
+		<label class="col-sm-2 control-label">[entry_label]</label>
+		<div class="col-sm-10">
+		  <input type="[entry_type]" name="attribute[[entry_id]]" value="" placeholder="[entry_label]" class="form-control" />
+		</div>
+	  </div>
+   </div>
+	
+	<div id="textarea" style="display:none">
+	  <div class="form-group">
+		<label class="col-sm-2 control-label">[entry_label]</label>
+		<div class="col-sm-10">
+		  <textarea name="attribute[[entry_id]]" placeholder="[entry_label]" id="" class="form-control summernote"></textarea>
+		</div>
+	  </div>
+  </div>
+  <script>
+  $LAB.script('<?php echo$client ?>_files/admin/js/model/data/imagemanager.js').wait(function(){    
+		$('#input-description').summernote({height: 300}); 
+		
+  });
+  
+  function getattributeform(request){
+	 $('#form-spatial-attribute').html("");
+	 $.ajax({
+		url: 'index.php?way=admin/object/attribute/autoform&<?php echo $sign; ?>&category_id=' +  encodeURIComponent(request),
+		dataType: 'json',
+		success: function(json) {
+			
+			for(var i in json){
+				for(var j in json[i].attribute){
+					var at_type = json[i].attribute[j].type;
+					var at_label = json[i].attribute[j].name;
+					var at_id = json[i].attribute[j].id;
+					var at_form = "";
+					if(at_type == "textarea"){
+						at_form = $('#textarea').html().split('[entry_label]').join(at_label);
+						at_form = at_form.split('[entry_id]').join(at_id);
+					}else{
+						at_form = $('#in-textarea').html().split('[entry_label]').join(at_label);
+						at_form = at_form.split('[entry_type]').join(at_type);
+						at_form = at_form.split('[entry_id]').join(at_id);
+						
+					}
+					
+					$('#form-spatial-attribute').append(at_form);
+					//alert(at_form);
+				}
+			}
+		},
+		error: function (request,error) { 
+				alert(JSON.stringify(request)); 
+		},
+	});
+		
+	 
+  }
+  </script>
+  
+  <script type="text/javascript">//<!--
+var special_row = <?php echo $special_row; ?>;
+
+function addSpecial() {
+	html  = '<tr id="special-row' + special_row + '">';
+    html += '  <td class="text-right"><input type="number" name="spatial_special[' + special_row + '][priority]" value="" placeholder="<?php echo $entry_priority; ?>" class="form-control" /></td>';
+	html += '  <td class="text-right"><input type="text" name="spatial_special[' + special_row + '][description]" value="" placeholder="description" class="form-control" /></td>';
+	html += '  <td class="text-right"><input type="text" name="spatial_special[' + special_row + '][price]" value="" placeholder="<?php echo $entry_price; ?>" class="form-control" /></td>';
+    html += '  <td class="text-left" style="width: 20%;"><div class="input-group date"><input type="text" name="spatial_special[' + special_row + '][date_start]" value="" placeholder="<?php echo $entry_date_start; ?>" data-date-format="DD-MM-YYYY" class="form-control date" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button></span></div></td>';
+	html += '  <td class="text-left" style="width: 20%;"><div class="input-group date"><input type="text" name="spatial_special[' + special_row + '][date_end]" value="" placeholder="<?php echo $entry_date_end; ?>" data-date-format="DD-MM-YYYY" class="form-control date" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button></span></div></td>';
+	html += '  <td class="text-left"><button type="button" onclick="$(\'#special-row' + special_row + '\').remove();" data-toggle="tooltip" title="<?php echo $button_remove; ?>" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+	html += '</tr>';
+
+	$('#special tbody').append(html);
+
+	$('.date').datetimepicker({
+		dateFormat:'dd:mm:yyyy',
+		pickTime: false
+	});
+
+	special_row++;
+}
+//--></script>
+
+<script type="text/javascript">//<!--
+var comment_row = <?php echo $comment_row; ?>;
+
+function addComment() {
+	html  = '<tr id="comment-row' + comment_row + '">';
+    html += '  <td class="text-right"><select name="spatial_comment[' + comment_row + '][status]" placeholder="-pilih-" class="form-control" ><option value="1">enabled</option><option value="0">disabled</option></select></td>';
+	html += '  <td class="text-right"><input type="text" name="spatial_comment[' + comment_row + '][username]" value="" placeholder="username" class="form-control" /></td>';
+	html += '  <td class="text-right" style="width: 50%;"><textarea class="form-control" name="spatial_comment[' + comment_row + '][comment]" placeholder="comment"></textarea></td>';
+    html += '  <td class="text-left" ><div class="input-group date"><input type="text" name="spatial_comment[' + comment_row + '][date]" value="" placeholder="date" data-date-format="DD-MM-YYYY" class="form-control date" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button></span></div></td>';
+	html += '  <td class="text-left"><div class="input-group"><input type="time" name="spatial_comment[' + comment_row + '][time]" value="" placeholder="time" class="form-control" /></div></td>';
+	html += '  <td class="text-left"><button type="button" onclick="$(\'#comment-row' + comment_row + '\').remove();" data-toggle="tooltip" title="remove" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+	html += '</tr>';
+
+	$('#comment tbody').append(html);
+
+	$('.date').datetimepicker({
+		dateFormat:'dd:mm:yyyy',
+		pickTime: false
+	});
+
+	comment_row++;
+}
+//--></script>
+
+  <script type="text/javascript"><!--
+var image_row = <?php echo $image_row; ?>;
+
+function addImage() {
+	html  = '<tr id="image-row' + image_row + '">';
+	html += '  <td class="text-left"><a href="" id="thumb-image' + image_row + '" data-toggle="image" class="img-thumbnail"><img src="<?php echo $placeholder; ?>" alt="" title="" data-placeholder="<?php echo $placeholder; ?>" /></a><input type="hidden" name="spatial_image[' + image_row + '][image]" value="" id="input-image' + image_row + '" /></td>';
+	html += '  <td class="text-right"><input type="text" name="spatial_image[' + image_row + '][name]" value="" placeholder="name" class="form-control" /></td>';
+	html += '  <td class="text-right"><input type="text" name="spatial_image[' + image_row + '][description]" value="" placeholder="description" class="form-control" /></td>';
+	html += '  <td class="text-right"><input type="number" name="spatial_image[' + image_row + '][sort_order]" value="" placeholder="<?php echo $entry_sort_order; ?>" class="form-control" /></td>';
+	html += '  <td class="text-left"><button type="button" onclick="$(\'#image-row' + image_row  + '\').remove();" data-toggle="tooltip" title="<?php echo $button_remove; ?>" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+	html += '</tr>';
+
+	$('#images tbody').append(html);
+
+	image_row++;
+}
+//--></script>
+
+<script type="text/javascript"
+      src="http://maps.google.com/maps/api/js?sensor=false&v=3.21.5a&libraries=drawing&signed_in=true&libraries=places,drawing"></script>
+<script>
+var drawingManager;
+      var selectedShape;
+      var colors = ['#1E90FF', '#FF1493', '#32CD32', '#FF8C00', '#4B0082'];
+      var selectedColor;
+      var colorButtons = {};
+
+      function clearSelection() {
+        if (selectedShape) {
+          if (typeof selectedShape.setEditable == 'function') {
+            selectedShape.setEditable(false);
+          }
+          selectedShape = null;
+        }
+        curseldiv.innerHTML = "<b>cursel</b>:";
+      }
+
+      function updateCurSelText(shape) {
+		
+		
+        posstr = "" + selectedShape.position;
+        if (typeof selectedShape.position == 'object') {
+          posstr = selectedShape.position.toUrlValue();
+        }
+        pathstr = "" + selectedShape.getPath;
+        var coord = ""; var coord_awal ="";
+		if (typeof selectedShape.getPath == 'function') {
+          pathstr = "(";
+          for (var i = 0; i < selectedShape.getPath().getLength(); i++) {
+            // .toUrlValue(5) limits number of decimals, default is 6 but can do more
+			coord = selectedShape.getPath().getAt(i).toUrlValue().split(",");
+            pathstr += coord[1]+' '+coord[0]+',';
+			if(coord_awal ==  ""){
+				coord_awal = coord[1]+' '+coord[0];
+			}
+          }
+		  //alert(coord_awal);
+          pathstr += coord_awal+")";
+        }
+        bndstr = "" + selectedShape.getBounds;
+        cntstr = "" + selectedShape.getBounds;
+        if (typeof selectedShape.getBounds == 'function') {
+          var tmpbounds = selectedShape.getBounds();
+          cntstr = "" + tmpbounds.getCenter().toUrlValue();
+          bndstr = "[NE: " + tmpbounds.getNorthEast().toUrlValue() + " SW: " + tmpbounds.getSouthWest().toUrlValue() + "]";
+        }
+        cntrstr = "" + selectedShape.getCenter;
+        if (typeof selectedShape.getCenter == 'function') {
+          cntrstr = "" + selectedShape.getCenter().toUrlValue();
+        }
+        radstr = "" + selectedShape.getRadius;
+        if (typeof selectedShape.getRadius == 'function') {
+          radstr = "" + selectedShape.getRadius();
+        }
+        curseldiv.innerHTML = "<b>cursel</b>: " + selectedShape.type + " " + selectedShape + "; <i>pos</i>: " + posstr + " ; <i>path</i>: " + pathstr + " ; <i>bounds</i>: " + bndstr + " ; <i>Cb</i>: " + cntstr + " ; <i>radius</i>: " + radstr + " ; <i>Cr</i>: " + cntrstr ;
+		
+		if(selectedShape.type == "marker"){
+			var markerpos = posstr.split(",");
+			coordiv.innerHTML = markerpos[1]+' '+markerpos[0];
+			document.getElementById('geomtype').value = "point";
+		}else if(selectedShape.type == "polyline"){
+			coordiv.innerHTML = pathstr;
+			document.getElementById('geomtype').value = "multilinestring";
+		}else {
+			coordiv.innerHTML = pathstr;
+			document.getElementById('geomtype').value = selectedShape.type;
+		}
+		
+		
+      }
+
+      function setSelection(shape, isNotMarker) {
+        clearSelection();
+        selectedShape = shape;
+        if (isNotMarker)
+          shape.setEditable(true);
+        selectColor(shape.get('fillColor') || shape.get('strokeColor'));
+        updateCurSelText(shape);
+      }
+
+      function deleteSelectedShape() {
+        if (selectedShape) {
+          selectedShape.setMap(null);
+        }
+      }
+
+      function selectColor(color) {
+        selectedColor = color;
+        for (var i = 0; i < colors.length; ++i) {
+          var currColor = colors[i];
+          colorButtons[currColor].style.border = currColor == color ? '2px solid #789' : '2px solid #fff';
+        }
+
+        // Retrieves the current options from the drawing manager and replaces the
+        // stroke or fill color as appropriate.
+        var polylineOptions = drawingManager.get('polylineOptions');
+        polylineOptions.strokeColor = color;
+        drawingManager.set('polylineOptions', polylineOptions);
+
+        var rectangleOptions = drawingManager.get('rectangleOptions');
+        rectangleOptions.fillColor = color;
+        drawingManager.set('rectangleOptions', rectangleOptions);
+
+        var circleOptions = drawingManager.get('circleOptions');
+        circleOptions.fillColor = color;
+        drawingManager.set('circleOptions', circleOptions);
+
+        var polygonOptions = drawingManager.get('polygonOptions');
+        polygonOptions.fillColor = color;
+        drawingManager.set('polygonOptions', polygonOptions);
+      }
+
+      function setSelectedShapeColor(color) {
+        if (selectedShape) {
+          if (selectedShape.type == google.maps.drawing.OverlayType.POLYLINE) {
+            selectedShape.set('strokeColor', color);
+          } else {
+            selectedShape.set('fillColor', color);
+          }
+        }
+      }
+
+      function makeColorButton(color) {
+        var button = document.createElement('span');
+        button.className = 'color-button';
+        button.style.backgroundColor = color;
+        google.maps.event.addDomListener(button, 'click', function() {
+          selectColor(color);
+          setSelectedShapeColor(color);
+        });
+
+        return button;
+      }
+
+       function buildColorPalette() {
+         var colorPalette = document.getElementById('color-palette');
+         for (var i = 0; i < colors.length; ++i) {
+           var currColor = colors[i];
+           var colorButton = makeColorButton(currColor);
+           colorPalette.appendChild(colorButton);
+           colorButtons[currColor] = colorButton;
+         }
+         selectColor(colors[0]);
+       }
+
+      /////////////////////////////////////
+      var map; //= new google.maps.Map(document.getElementById('map'), {
+      // these must have global refs too!:
+      var placeMarkers = [];
+      var input;
+      var searchBox;
+      var curposdiv;
+      var curseldiv;
+
+      function deletePlacesSearchResults() {
+        for (var i = 0, marker; marker = placeMarkers[i]; i++) {
+          marker.setMap(null);
+        }
+        placeMarkers = [];
+        input.value = ''; // clear the box too
+      }
+
+      /////////////////////////////////////
+      function initialize() {
+        map = new google.maps.Map(document.getElementById('map'), { //var
+          zoom: 15,//10,
+          center: new google.maps.LatLng(<?php echo isset($thegeom['center2'])?$thegeom['center2']:"-0.302254, 100.375229"; ?>),//(22.344, 114.048),
+          mapTypeId: google.maps.MapTypeId.ROADMAP,
+          disableDefaultUI: false,
+          zoomControl: true
+        });
+		
+		
+		//=============================================================================
+		
+		 <?php if(isset($thegeom['coordinates']) && $thegeom['type']!="Point") { ?>
+		 var triangle = <?php echo$thegeom['coordinates']; ?>;
+
+		 var bermudaTriangle = new google.maps.Polygon({
+			paths: triangle,
+			strokeColor: '#FF0000',
+			strokeOpacity: 0.8,
+			strokeWeight: 3,
+			fillColor: '#FF0000',
+			fillOpacity: 0.35
+		  });
+		  bermudaTriangle.setMap(map);
+
+		<?php }else if(isset($thegeom['type']) && $thegeom['type']=="Point"){ ?>
+		 var marker = new google.maps.Marker({
+			position: <?php echo$thegeom['center1']; ?>,
+			map: map,
+			title: 'Hello World!'
+		  });
+
+		<?php	}?>
+		
+		
+		//===============================================================
+		
+		
+		
+		
+        curposdiv = document.getElementById('curpos');
+        curseldiv = document.getElementById('cursel');
+		coordiv   = document.getElementById('coordinate');
+        var polyOptions = {
+          strokeWeight: 0,
+          fillOpacity: 0.45,
+          editable: true
+        };
+        // Creates a drawing manager attached to the map that allows the user to draw
+        // markers, lines, and shapes.
+        drawingManager = new google.maps.drawing.DrawingManager({
+          drawingControl : true,
+		  drawingControlOptions : {
+				position : google.maps.ControlPosition.TOP_CENTER,
+				drawingModes: [
+					google.maps.drawing.OverlayType.POLYGON,
+					google.maps.drawing.OverlayType.POLYLINE,
+					google.maps.drawing.OverlayType.MARKER
+				],
+		  },
+		  drawingMode: google.maps.drawing.OverlayType.POLYGON,
+          markerOptions: {
+            draggable: true,
+            editable: true,
+          },
+          polylineOptions: {
+            editable: true
+          },
+          rectangleOptions: polyOptions,
+          circleOptions: polyOptions,
+          polygonOptions: polyOptions,
+          map: map
+        });
+
+        google.maps.event.addListener(drawingManager, 'overlaycomplete', function(e) {
+          //~ if (e.type != google.maps.drawing.OverlayType.MARKER) {
+            var isNotMarker = (e.type != google.maps.drawing.OverlayType.MARKER);
+            // Switch back to non-drawing mode after drawing a shape.
+            drawingManager.setDrawingMode(null);
+
+            // Add an event listener that selects the newly-drawn shape when the user
+            // mouses down on it.
+            var newShape = e.overlay;
+            newShape.type = e.type;
+            google.maps.event.addListener(newShape, 'click', function() {
+              setSelection(newShape, isNotMarker);
+            });
+            google.maps.event.addListener(newShape, 'drag', function() {
+              updateCurSelText(newShape);
+            });
+            google.maps.event.addListener(newShape, 'dragend', function() {
+              updateCurSelText(newShape);
+            });
+            setSelection(newShape, isNotMarker);
+          //~ }// end if
+        });
+
+        // Clear the current selection when the drawing mode is changed, or when the
+        // map is clicked.
+        google.maps.event.addListener(drawingManager, 'drawingmode_changed', clearSelection);
+        google.maps.event.addListener(map, 'click', clearSelection);
+        google.maps.event.addDomListener(document.getElementById('delete-button'), 'click', deleteSelectedShape);
+
+        buildColorPalette();
+
+        //~ initSearch();
+        // Create the search box and link it to the UI element.
+         input = /** @type {HTMLInputElement} */( //var
+            document.getElementById('pac-input'));
+        map.controls[google.maps.ControlPosition.TOP_RIGHT].push(input);
+        //
+        var DelPlcButDiv = document.createElement('div');
+        //~ DelPlcButDiv.style.color = 'rgb(25,25,25)'; // no effect?
+        DelPlcButDiv.style.backgroundColor = '#fff';
+        DelPlcButDiv.style.cursor = 'pointer';
+        DelPlcButDiv.innerHTML = 'DEL';
+        map.controls[google.maps.ControlPosition.TOP_RIGHT].push(DelPlcButDiv);
+        google.maps.event.addDomListener(DelPlcButDiv, 'click', deletePlacesSearchResults);
+
+        searchBox = new google.maps.places.SearchBox( //var
+          /** @type {HTMLInputElement} */(input));
+
+        // Listen for the event fired when the user selects an item from the
+        // pick list. Retrieve the matching places for that item.
+        google.maps.event.addListener(searchBox, 'places_changed', function() {
+          var places = searchBox.getPlaces();
+
+          if (places.length == 0) {
+            return;
+          }
+          for (var i = 0, marker; marker = placeMarkers[i]; i++) {
+            marker.setMap(null);
+          }
+
+          // For each place, get the icon, place name, and location.
+          placeMarkers = [];
+          var bounds = new google.maps.LatLngBounds();
+          for (var i = 0, place; place = places[i]; i++) {
+            var image = {
+              url: place.icon,
+              size: new google.maps.Size(71, 71),
+              origin: new google.maps.Point(0, 0),
+              anchor: new google.maps.Point(17, 34),
+              scaledSize: new google.maps.Size(25, 25)
+            };
+
+            // Create a marker for each place.
+            var marker = new google.maps.Marker({
+              map: map,
+              icon: image,
+              title: place.name,
+              position: place.geometry.location
+            });
+
+            placeMarkers.push(marker);
+
+            bounds.extend(place.geometry.location);
+          }
+
+          map.fitBounds(bounds);
+        });
+
+        // Bias the SearchBox results towards places that are within the bounds of the
+        // current map's viewport.
+        google.maps.event.addListener(map, 'bounds_changed', function() {
+          var bounds = map.getBounds();
+          searchBox.setBounds(bounds);
+          curposdiv.innerHTML = "<b>curpos</b> Z: " + map.getZoom() + " C: " + map.getCenter().toUrlValue();
+        }); //////////////////////
+      }
+      google.maps.event.addDomListener(window, 'load', initialize);
+</script>
+</div>
+<?php echo $footer; ?>

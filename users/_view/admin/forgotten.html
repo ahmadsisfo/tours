@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Forgotten</title>
+    <link rel="stylesheet" href="<? echo$client ?>admin/login/style.css">
+  </head>
+
+  <body>
+	<br/>
+	<div style="text-align:center">
+		<a href="<? echo$url_home ?>">Home</a>
+		<a href="<? echo$url_login ?>">Sign In</a>
+    </div>
+	<div class="wrapper">
+	<div class="container">
+		
+		<h1>Forgot Your Password ?</h1>
+		<form class="form" method="post" action="<?echo$url_action ?>" id="form-login">
+			<?if (isset($error_warning)){?>
+				<label style="color:#9A1B45"><? echo$error_warning ?></label><br/>
+			<? } ?>
+			<input type="text" name="email" placeholder="email anda" autofocus />
+			<button type="submit" id="login-button">Send Mail</button>
+		</form>
+		
+		<br/>
+		<h4 style="color:#52CCa5; position:fixed; bottom:30px; right:30px;">&copy; IRSTour by Rahmat Nurfajri | RNF Aypro</h4>
+    
+	</div>
+	
+	<ul class="bg-bubbles">
+		<li></li><li></li><li></li><li></li>
+		<li></li><li></li><li></li><li></li>
+		<li></li><li></li><li></li><li></li>
+		<li></li><li></li><li></li><li></li>
+		<li></li><li></li><li></li><li></li>
+	</ul>
+</div>
+	
+  </body>
+</html>

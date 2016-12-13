@@ -1,0 +1,27 @@
+2016-11-14 16:49:50 - PHP Notice:  Undefined index: sign di C:\xampp\htdocs\sample\tours\users\_control\admin\tools\handling.php pada baris ke 533
+2016-11-14 17:09:39 - PHP Notice:  Undefined index: sign di C:\xampp\htdocs\sample\tours\users\_control\admin\home\dashboard.php pada baris ke 51
+2016-11-14 17:09:39 - PHP Notice:  Undefined index: sign di C:\xampp\htdocs\sample\tours\users\_control\admin\home\dashboard.php pada baris ke 117
+2016-11-14 17:09:39 - PHP Notice:  Undefined index: sign di C:\xampp\htdocs\sample\tours\users\_control\admin\home\dashboard.php pada baris ke 118
+2016-11-14 17:09:39 - PHP Notice:  Undefined index: sign di C:\xampp\htdocs\sample\tours\users\_control\admin\home\dashboard.php pada baris ke 119
+2016-11-14 17:09:39 - PHP Notice:  Undefined index: sign di C:\xampp\htdocs\sample\tours\users\_control\admin\home\dashboard.php pada baris ke 135
+2016-11-14 17:09:39 - PHP Notice:  Undefined index: sign di C:\xampp\htdocs\sample\tours\users\_control\admin\home\dashboard.php pada baris ke 147
+2016-11-14 17:33:15 - PHP Warning:  pg_query(): Query failed: ERROR:  parse error - invalid geometry
+HINT:  &quot;POLYGON((100.37142634391807+-&quot; &lt;-- parse error at position 29 within geometry di C:\xampp\htdocs\sample\tours\systems\engine\db\pgsql.php pada baris ke 16
+2016-11-14 17:33:15 - PHP Warning:  pg_result_error(): supplied resource is not a valid PostgreSQL result resource di C:\xampp\htdocs\sample\tours\systems\engine\db\pgsql.php pada baris ke 44
+2016-11-14 17:33:15 - PHP Notice:  Error: <br />UPDATE tb_penginapan SET geom= ST_GeomFromText('POLYGON((100.37142634391807+-0.30006271526639,100.37108302116394+-0.306113694138215,100.38503050804093+-0.305427058408345,100.38172602653503+-0.297916977270511,100.37142634391807+-0.30006271526639))'),geom_color='#000000' WHERE penginapan_id ='46' di C:\xampp\htdocs\sample\tours\systems\engine\db\pgsql.php pada baris ke 44
+2016-12-09 21:26:47 - PHP Notice:  Undefined index: sign di C:\xampp\htdocs\sample\tours\users\_control\admin\home\dashboard.php pada baris ke 51
+2016-12-09 21:26:50 - PHP Notice:  Undefined index: sign di C:\xampp\htdocs\sample\tours\users\_control\admin\home\dashboard.php pada baris ke 117
+2016-12-09 21:26:50 - PHP Notice:  Undefined index: sign di C:\xampp\htdocs\sample\tours\users\_control\admin\home\dashboard.php pada baris ke 118
+2016-12-09 21:26:50 - PHP Notice:  Undefined index: sign di C:\xampp\htdocs\sample\tours\users\_control\admin\home\dashboard.php pada baris ke 119
+2016-12-09 21:26:50 - PHP Notice:  Undefined index: sign di C:\xampp\htdocs\sample\tours\users\_control\admin\home\dashboard.php pada baris ke 135
+2016-12-09 21:26:50 - PHP Notice:  Undefined index: sign di C:\xampp\htdocs\sample\tours\users\_control\admin\home\dashboard.php pada baris ke 147
+2016-12-09 22:05:35 - PHP Warning:  pg_query(): Query failed: ERROR:  kolom « name » tidak ada
+LINE 1: SELECT * FROM tb_user ORDER BY name DESC
+                                       ^ di C:\xampp\htdocs\sample\tours\systems\engine\db\pgsql.php pada baris ke 16
+2016-12-09 22:05:35 - PHP Warning:  pg_result_error(): supplied resource is not a valid PostgreSQL result resource di C:\xampp\htdocs\sample\tours\systems\engine\db\pgsql.php pada baris ke 44
+2016-12-09 22:05:35 - PHP Notice:  Error: <br />SELECT * FROM tb_user ORDER BY name DESC di C:\xampp\htdocs\sample\tours\systems\engine\db\pgsql.php pada baris ke 44
+2016-12-09 22:05:49 - PHP Warning:  pg_query(): Query failed: ERROR:  kolom « name » tidak ada
+LINE 1: SELECT * FROM tb_user ORDER BY name DESC
+                                       ^ di C:\xampp\htdocs\sample\tours\systems\engine\db\pgsql.php pada baris ke 16
+2016-12-09 22:05:49 - PHP Warning:  pg_result_error(): supplied resource is not a valid PostgreSQL result resource di C:\xampp\htdocs\sample\tours\systems\engine\db\pgsql.php pada baris ke 44
+2016-12-09 22:05:49 - PHP Notice:  Error: <br />SELECT * FROM tb_user ORDER BY name DESC di C:\xampp\htdocs\sample\tours\systems\engine\db\pgsql.php pada baris ke 44

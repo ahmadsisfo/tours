@@ -1,0 +1,510 @@
+<style  type="text/css">
+	#canvas{height:500px; background:#AAAAFF; border:1px solid #AAAAFF}
+</style>
+<link href="<?php echo$client ?>library/colorpic/css/bootstrap-colorpicker.min.css" rel="stylesheet">
+<div class="form-group">
+	<div class="col-sm-3">
+	
+		<div id="panel">
+			<div id="cp2" class="input-group colorpicker-component">
+				<input type="text" value="<?php echo (isset($[fieldname]['color']))?$[fieldname]['color']:'#000000'; ?>" name="[inputname][color]" class="form-control" id="colorpic" />
+				<span class="input-group-addon"><i></i></span>
+			</div><br/>
+			<div class="btn-group btn-group-justified" role="group" aria-label="...">
+				<a id="delete-button" class="btn btn-danger"><i class="fa fa-trash-o"></i></a>
+				<a id="play-button" class="btn btn-success"><i class="fa fa-play"></i></a>
+			</div><br/>
+			
+			<textarea name="[inputname][coordinate]" id="wkt" class="form-control" placeholder="coordinate" value="<?php echo (isset($[fieldname]['coordinate']))?$[fieldname]['coordinate']:''; ?>" style="height:120px;"><?php echo (isset($[fieldname]['coordinate']))?$[fieldname]['coordinate']:''; ?></textarea>	
+			<label><input type="checkbox" name="urlify" id="urlify" />Format for URLs</label><br/><br/>
+			
+			<div id="curpos" class="alert alert-info"></div>
+			<div id="note" class="alert alert-warning">
+				<small>Note: markers can be selected, but are not graphically indicated; can be deleted, but cannot have their color changed.</small>
+			</div>
+			<div id="cursel" class="alert alert-success">info :</div>
+		</div>
+		
+	</div>	
+	<input type="text" id="pac-input" placeholder="Search for..." style="width:30%;"  class="form-control" />
+	<div class="col-sm-9">
+		
+		<div id="canvas" class="col-sx"></div>
+	</div>
+</div>
+<script>
+$LAB.script('http://maps.google.com/maps/api/js?key=AIzaSyD_hLyh5CVtYgpzavcIB3mcPqv2Lh24XHU&signed_in=true&libraries=places,drawing')
+.script(LINK+'library/wicket/wicket.js')
+.script(LINK+'library/wicket/wicket-gmap3.js')
+.script(LINK+'library/colorpic/js/bootstrap-colorpicker.min.js').wait(function(){    
+	var input;
+	var searchBox;
+	var curposdiv;
+	var curseldiv;
+	var coordiv;
+	var placeMarkers = [];
+	var selectedShape;
+    var selectedColor;
+	
+	var app = (function () {
+    return {
+        features: [],
+      
+        clearMap: function () {
+			
+            if(this.features){
+				var i;
+				document.getElementById('wkt').last = '';
+
+				for (i in this.features) {
+					if (this.features.hasOwnProperty(i)) {
+						this.features[i].setMap(null);
+					}
+				}
+				curseldiv.innerHTML = "<b>cursel</b>:";
+				this.features.length = 0;
+			}
+        },
+        /**
+         * Clears the current contents of the textarea.
+         */
+        clearText: function () {
+            document.getElementById('wkt').value = '';
+        },
+        /**
+         * Maps the current contents of the textarea.
+         * @return  {Object}    Some sort of geometry object
+         */
+        mapIt: function () {
+            var el, obj, wkt;
+
+            el = document.getElementById('wkt');
+            wkt = new Wkt.Wkt();
+
+            if (el.last === el.value) { // Remember the last string
+                return; // Do nothing if the WKT string hasn't changed
+            } else {
+                el.last = el.value;
+            }
+
+            try { // Catch any malformed WKT strings
+                wkt.read(el.value);
+            } catch (e1) {
+                try {
+                    wkt.read(el.value.replace('\n', '').replace('\r', '').replace('\t', ''));
+                } catch (e2) {
+                    if (e2.name === 'WKTError') {
+                        console.log('Wicket could not understand the WKT string you entered. Check that you have parentheses balanced, and try removing tabs and newline characters.');
+                        return;
+                    }
+                }
+            }
+
+            obj = wkt.toObject(this.gmap.defaults); // Make an object
+
+            // Add listeners for overlay editing events
+            if (!Wkt.isArray(obj) && wkt.type !== 'point') {
+                // New vertex is inserted
+                google.maps.event.addListener(obj.getPath(), 'insert_at', function (n) {
+                    app.updateText();
+                });
+                // Existing vertex is removed (insertion is undone)
+                google.maps.event.addListener(obj.getPath(), 'remove_at', function (n) {
+                    app.updateText();
+                });
+                // Existing vertex is moved (set elsewhere)
+                google.maps.event.addListener(obj.getPath(), 'set_at', function (n) {
+                    app.updateText();
+                });
+            } else {
+                if (obj.setEditable) {obj.setEditable(false);}
+            }
+
+			var bounds = new google.maps.LatLngBounds();
+
+            if (Wkt.isArray(obj)) { // Distinguish multigeometries (Arrays) from objects
+                for (i in obj) {
+                    if (obj.hasOwnProperty(i) && !Wkt.isArray(obj[i])) {
+                        obj[i].setMap(this.gmap);
+                        this.features.push(obj[i]);
+
+                        if(wkt.type === 'point' || wkt.type === 'multipoint')
+                        	bounds.extend(obj[i].getPosition());
+                        else
+                        	obj[i].getPath().forEach(function(element,index){bounds.extend(element)});
+                    }
+                }
+
+                this.features = this.features.concat(obj);
+            } else {
+                obj.setMap(this.gmap); // Add it to the map
+                this.features.push(obj);
+
+                if(wkt.type === 'point' || wkt.type === 'multipoint')
+                	bounds.extend(obj.getPosition());
+                else
+                	obj.getPath().forEach(function(element,index){bounds.extend(element)});
+            }
+
+            // Pan the map to the feature
+            this.gmap.fitBounds(bounds);
+
+            return obj;
+        },
+        /**
+         * Updates the textarea based on the first available feature.
+         */
+        updateText: function () {
+            var wkt = new Wkt.Wkt();
+            wkt.fromObject(this.features[0]);
+            document.getElementById('wkt').value = wkt.write();
+        },
+		
+        updateTextPart: function () {
+            var i, w, v;
+
+            w = new Wkt.Wkt(this.features[0]);
+
+            i = 1;
+            while (i < this.features.length) {
+                v = new Wkt.Wkt(this.features[i]);
+                w.merge(v);
+                i += 1;
+            }
+
+            document.getElementById('wkt').value = w.write();
+        },
+        /**
+         * Formats the textarea contents for a URL.
+         * @param   checked {Boolean}   The check state of the associated checkbox
+         */
+        urlify: function (checked) {
+            var wkt = new Wkt.Wkt();
+            wkt.read(document.getElementById('wkt').value);
+            wkt.delimiter = (checked) ? '+' : ' ';
+            document.getElementById('wkt').value = wkt.write();
+            return wkt;
+        },
+		
+		clearSelection: function () {
+			if (selectedShape) {
+				if (typeof selectedShape.setEditable == 'function') {
+					selectedShape.setEditable(false);
+				}
+				selectedShape = null;
+				
+			}
+			
+		},
+		
+		updateCurSelText: function (shapeCur) {
+			posstr = "" + shapeCur.position;
+			if (typeof shapeCur.position == 'object') {
+				posstr = shapeCur.position.toUrlValue();
+			}
+			pathstr = "" + shapeCur.getPath;
+			var coord = ""; var coord_awal ="";
+			if (typeof shapeCur.getPath == 'function') {
+				pathstr = "(";
+				for (var i = 0; i < shapeCur.getPath().getLength(); i++) {
+					// .toUrlValue(5) limits number of decimals, default is 6 but can do more
+					coord = shapeCur.getPath().getAt(i).toUrlValue().split(",");
+					pathstr += coord[1]+' '+coord[0]+',';
+					if(coord_awal ==  ""){
+						coord_awal = coord[1]+' '+coord[0];
+					}
+				}	
+				//alert(coord_awal);
+				pathstr += coord_awal+")";
+			}
+			bndstr = "" + shapeCur.getBounds;
+			cntstr = "" + shapeCur.getBounds;
+			if (typeof shapeCur.getBounds == 'function') {
+				var tmpbounds = shapeCur.getBounds();
+				cntstr = "" + tmpbounds.getCenter().toUrlValue();
+				bndstr = "[NE: " + tmpbounds.getNorthEast().toUrlValue() + " SW: " + tmpbounds.getSouthWest().toUrlValue() + "]";
+			}
+			cntrstr = "" + shapeCur.getCenter;
+			if (typeof shapeCur.getCenter == 'function') {
+				cntrstr = "" + shapeCur.getCenter().toUrlValue();
+			}
+			radstr = "" + shapeCur.getRadius;
+			if (typeof shapeCur.getRadius == 'function') {
+				radstr = "" + shapeCur.getRadius();
+			}
+			curseldiv.innerHTML = "<b>cursel</b>: " + shapeCur.type + " " + shapeCur + "; <i>pos</i>: " + posstr + " ; <i>path</i>: " + pathstr + " ; <i>bounds</i>: " + bndstr + " ; <i>Cb</i>: " + cntstr + " ; <i>radius</i>: " + radstr + " ; <i>Cr</i>: " + cntrstr ;
+		},
+		
+		setSelection: function (shape, isNotMarker, drawingManager) {
+			app.clearSelection();
+			selectedShape = shape;
+			if (isNotMarker)
+			  shape.setEditable(true);
+			  app.selectColor(shape.get('fillColor') || shape.get('strokeColor'), drawingManager);
+			app.updateCurSelText(shape);
+			
+		},
+
+		deletePlacesSearchResults: function () {
+			for (var i = 0, marker; marker = placeMarkers[i]; i++) {
+				marker.setMap(null);
+			}
+			placeMarkers = [];
+			input.value = ''; // clear the box too
+			
+			
+		},
+		
+		selectColor: function (color, drawingManager) {
+			selectedColor = color;
+			
+			// stroke or fill color as appropriate.
+			var polylineOptions = drawingManager.get('polylineOptions');
+			polylineOptions.strokeColor = color;
+			drawingManager.set('polylineOptions', polylineOptions);
+
+			var rectangleOptions = drawingManager.get('rectangleOptions');
+			rectangleOptions.fillColor = color;
+			drawingManager.set('rectangleOptions', rectangleOptions);
+
+			var circleOptions = drawingManager.get('circleOptions');
+			circleOptions.fillColor = color;
+			drawingManager.set('circleOptions', circleOptions);
+
+			var polygonOptions = drawingManager.get('polygonOptions');
+			polygonOptions.fillColor = color;
+			drawingManager.set('polygonOptions', polygonOptions);
+			
+			return drawingManager;
+		},
+
+		setSelectedShapeColor: function (color) {
+			if (this.features) {
+				for (i in this.features) {
+					if (this.features[i].type == google.maps.drawing.OverlayType.POLYLINE) {
+						this.features[i].set('strokeColor', color);
+					} else {
+						this.features[i].set('fillColor', color);
+						this.features[i].set('strokeColor', color);
+					}
+				}
+			}
+		},
+        /**
+         * Application entry point.
+         * @return  {<google.maps.Map>} The Google Maps API instance
+         */
+        init: function () {
+            var gmap;
+			
+	
+            gmap = new google.maps.Map(document.getElementById('canvas'), {
+                center: new google.maps.LatLng(-0.302254, 100.375229),
+                defaults: {
+                    //icon: 'red_dot.png',
+                    //shadow: 'dot_shadow.png',
+                    editable: true,
+                    strokeColor: '#990000',
+                    fillColor: '#EEFFCC',
+                    fillOpacity: 0.6
+                },
+                disableDefaultUI: true,
+                mapTypeControl: true,
+                mapTypeId: google.maps.MapTypeId.SATELLITE,
+                mapTypeControlOptions: {
+                    position: google.maps.ControlPosition.TOP_LEFT,
+                    style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+                },
+                panControl: false,
+                streetViewControl: false,
+                zoom: 15,
+                zoomControl: true,
+                zoomControlOptions: {
+                    position: google.maps.ControlPosition.LEFT_TOP,
+                    style: google.maps.ZoomControlStyle.SMALL
+                }
+            });
+
+            google.maps.event.addListener(gmap, 'tilesloaded', function () {
+                if (!this.loaded) {
+                    this.loaded = true;
+                    // NOTE: We start with a MULTIPOLYGON; these aren't easily deconstructed, so we won't set this object to be editable in this example
+                    //document.getElementById('wkt').value = '';
+                    app.mapIt();
+					app.updateText();
+                }
+            });
+
+            gmap.drawingManager = new google.maps.drawing.DrawingManager({
+                drawingControlOptions: {
+                    position: google.maps.ControlPosition.TOP_CENTER,
+                    drawingModes: [
+                        google.maps.drawing.OverlayType.MARKER,
+                        google.maps.drawing.OverlayType.POLYLINE,
+                        google.maps.drawing.OverlayType.POLYGON,
+                        google.maps.drawing.OverlayType.RECTANGLE,
+                        google.maps.drawing.OverlayType.CIRCLE,
+                    ]
+                },
+                markerOptions: gmap.defaults,
+                polygonOptions: gmap.defaults,
+                polylineOptions: gmap.defaults,
+                rectangleOptions: gmap.defaults,
+                circleOptions: gmap.defaults
+            });
+            gmap.drawingManager.setMap(gmap);
+
+            google.maps.event.addListener(gmap.drawingManager, 'overlaycomplete', function (event) {
+                var wkt;
+
+                app.clearText();
+                app.clearMap();
+
+                // Set the drawing mode to "pan" (the hand) so users can immediately edit
+                this.setDrawingMode(null);
+
+                // Polygon drawn
+                if (event.type === google.maps.drawing.OverlayType.POLYGON || event.type === google.maps.drawing.OverlayType.POLYLINE) {
+                    // New vertex is inserted
+                    google.maps.event.addListener(event.overlay.getPath(), 'insert_at', function (n) {
+                        app.updateText();
+                    });
+
+                    // Existing vertex is removed (insertion is undone)
+                    google.maps.event.addListener(event.overlay.getPath(), 'remove_at', function (n) {
+                        app.updateText();
+                    });
+
+                    // Existing vertex is moved (set elsewhere)
+                    google.maps.event.addListener(event.overlay.getPath(), 'set_at', function (n) {
+                        app.updateText();
+                    });
+                } else if (event.type === google.maps.drawing.OverlayType.RECTANGLE) { // Rectangle drawn
+                    // Listen for the 'bounds_changed' event and update the geometry
+                    google.maps.event.addListener(event.overlay, 'bounds_changed', function () {
+                        app.updateText();
+                    });
+                }
+				
+				var isNotMarker = (event.type != google.maps.drawing.OverlayType.MARKER);
+				// Switch back to non-drawing mode after drawing a shape.
+				//drawingManager.setDrawingMode(null);
+				
+				var newShape = event.overlay;
+				newShape.type = event.type;
+				google.maps.event.addListener(newShape, 'click', function() {
+					app.setSelection(newShape, isNotMarker, this);
+				});
+				google.maps.event.addListener(newShape, 'drag', function() {
+					app.updateCurSelText(newShape);
+				});
+				google.maps.event.addListener(newShape, 'dragend', function() {
+					app.updateCurSelText(newShape);
+				});
+				app.setSelection(newShape, isNotMarker, this);
+				
+                app.features.push(event.overlay);
+                wkt = new Wkt.Wkt();
+                wkt.fromObject(event.overlay);
+                document.getElementById('wkt').value = wkt.write();
+            });
+			
+			google.maps.event.addListener(gmap.drawingManager, 'drawingmode_changed', app.clearSelection);
+			google.maps.event.addListener(gmap, 'click', app.clearSelection);
+			google.maps.event.addDomListener(document.getElementById('delete-button'), 'click', app.clearMap);
+			
+			// Create the search box and link it to the UI element.
+			input = (document.getElementById('pac-input'));
+			curposdiv = document.getElementById('curpos');
+			curseldiv = document.getElementById('cursel');
+			coordiv   = document.getElementById('wkt');
+			gmap.controls[google.maps.ControlPosition.TOP_RIGHT].push(input);
+			//
+			var DelPlcButDiv = document.createElement('div');
+			DelPlcButDiv.style.backgroundColor = '#eee';
+			DelPlcButDiv.style.cursor = 'pointer';
+			DelPlcButDiv.style.padding = '7px';
+			DelPlcButDiv.style.border = '1px solid #aaa';
+			DelPlcButDiv.innerHTML = 'X';
+			gmap.controls[google.maps.ControlPosition.TOP_RIGHT].push(DelPlcButDiv);
+			google.maps.event.addDomListener(DelPlcButDiv, 'click', app.deletePlacesSearchResults);
+
+			searchBox = new google.maps.places.SearchBox((input));
+			
+			// pick list. Retrieve the matching places for that item.
+			google.maps.event.addListener(searchBox, 'places_changed', function() {
+				var places = searchBox.getPlaces();
+
+				if (places.length == 0) {
+					return;
+				}
+				for (var i = 0, marker; marker = placeMarkers[i]; i++) {
+					marker.setMap(null);
+				}
+
+				// For each place, get the icon, place name, and location.
+				placeMarkers = [];
+				var bounds = new google.maps.LatLngBounds();
+				for (var i = 0, place; place = places[i]; i++) {
+					var image = {
+						url: place.icon,
+						size: new google.maps.Size(71, 71),
+						origin: new google.maps.Point(0, 0),
+						anchor: new google.maps.Point(17, 34),
+						scaledSize: new google.maps.Size(25, 25)
+					};	
+
+					// Create a marker for each place.
+					var marker = new google.maps.Marker({
+						map: gmap,
+						icon: image,
+						title: place.name,
+						position: place.geometry.location
+					});
+
+					placeMarkers.push(marker);
+
+					bounds.extend(place.geometry.location);
+				}
+
+				gmap.fitBounds(bounds);
+			});
+			
+			// current map's viewport.
+			google.maps.event.addListener(gmap, 'bounds_changed', function() {
+				var bounds = gmap.getBounds();
+				searchBox.setBounds(bounds);
+				curposdiv.innerHTML = "<b>curpos</b> Z: " + gmap.getZoom() + " C: " + gmap.getCenter().toUrlValue();
+			});
+			
+			$('#cp2').colorpicker().on('changeColor', function(ev) {
+				var colorCode = $(this).colorpicker('getValue', '#000');
+				gmap.drawingManager = app.selectColor(colorCode, gmap.drawingManager);
+				app.setSelectedShapeColor(colorCode);
+			});
+			
+			$('#urlify').on('change', function(ev) {
+				app.urlify(this.checked);
+			});
+			
+			$('#play-button').on('click', function(ev) {
+				app.clearMap();app.mapIt();
+			});
+			
+			$('#delete-button').on('click', function(ev) {
+				app.clearText();app.clearMap();
+			});
+			
+			
+			gmap.drawingManager = app.selectColor( $('#colorpic').val(),gmap.drawingManager);
+			
+            return gmap;
+        }
+    };
+}()); // Execute immediately
+
+	app.gmap=app.init();
+
+});
+
+</script>

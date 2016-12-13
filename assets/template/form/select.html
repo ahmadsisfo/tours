@@ -1,0 +1,11 @@
+<div class="form-group [required]">
+	<label class="col-sm-2 control-label" for="input-[inputname]"><?php echo $entry_[inputname]; ?></label>
+	<div class="col-sm-10">
+		<select name="[inputname]" id="input-[inputname]" class="form-control"><option value="">---</option><?php if(isset($select_[fieldname])&&($select_[fieldname])){ foreach($select_[fieldname] as $key => $value){?>
+			<option value="<? echo$value ?>" <?php if(isset($[fieldname])&&($[fieldname])&&($[fieldname]==$value))echo'selected' ?> ><? echo$key ?></option>
+		<? }} ?></select>
+		<?php if (isset($error['[inputname]'])) { ?>
+		<div class="text-danger"><?php echo $error['[inputname]']; ?></div>
+		<?php } ?>
+	</div>
+</div>

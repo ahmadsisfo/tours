@@ -1,0 +1,9 @@
+<div class="form-group [required]">
+	<label class="col-sm-2 control-label" for="input-[inputname]"><?php echo $entry_[inputname]; ?></label>
+	<div class="col-sm-10 checkbox">
+		<input type="radio" name="[inputname]" value="<?php echo$[fieldname]; ?>" id="input-[inputname]" class="form-control" /> <?php echo $placeholder_[inputname]; ?>
+		<?php if (isset($error['[inputname]'])) { ?>
+		<div class="text-danger"><?php echo $error['[inputname]']; ?></div>
+		<?php } ?>
+	</div>
+</div>

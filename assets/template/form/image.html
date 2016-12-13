@@ -1,0 +1,11 @@
+<div class="form-group [required]">
+	<label class="col-sm-2 control-label" for="input-[inputname]"><?php echo $entry_[inputname]; ?></label>
+	<input type="hidden" name="[inputname]_thumb" class="thumb" value="<?php echo str_replace($assets."image/","",$thumb); ?>" />
+	<div class="col-sm-10"><a href="" data-toggle="image" class="img-thumbnail" id="[inputname]" data-name="inputimage"><img src="<?php echo $thumb; ?>" alt="" title="" data-placeholder="<?php echo $placeholder ?>" /></a>
+	  <input type="hidden" name="[inputname]" value="<?php echo $[fieldname]; ?>" id="input-[inputname]" />
+	</div>
+	<?php if (isset($error['[inputname]'])) { ?>
+	<div class="text-danger"><?php echo $error['[inputname]']; ?></div>
+	<?php } ?>
+</div>
+<script type="text/javascript">$LAB.script(LINK+"admin/js/model/tools/image.js").wait(function(){});</script>
